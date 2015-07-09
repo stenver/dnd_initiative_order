@@ -44,3 +44,6 @@ FORMS += \
 
 #INCLUDEPATH += $$PWD/../../../../usr/local/Qxt/include
 #DEPENDPATH += $$PWD/../../../../usr/local/Qxt/include
+
+RESOURCES += \
+    sounds.qrc

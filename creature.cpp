@@ -156,9 +156,8 @@ void Creature::setupExtraInfoLayout(){
 }
 
 void Creature::setupSounds(){
-    // TODO set proper relative path
-    friendPlayer = new QSound(QUrl::fromLocalFile("/Users/stenver/cpp/dnd_initatives/friend.wav").path());
-    foePlayer = new QSound(QUrl::fromLocalFile("/Users/stenver/cpp/dnd_initatives/foe.wav").path());
+    friendPlayer = new QSound(QUrl::fromLocalFile(":/sounds/friend.wav").path());
+    foePlayer = new QSound(QUrl::fromLocalFile(":/sounds/foe.wav").path());
 }
 
 void Creature::configureStylesheet(){

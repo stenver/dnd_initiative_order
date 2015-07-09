@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>sounds/foe.wav</file>
+        <file>sounds/friend.wav</file>
+    </qresource>
+</RCC>
