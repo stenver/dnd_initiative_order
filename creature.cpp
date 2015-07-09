@@ -88,7 +88,7 @@ double Creature::initiativeValue() const{
     return initiativeSpinBox->value();
 }
 
-void Creature::changeAlliance(int state){
+void Creature::changeAlliance(){
     configureStylesheet();
 }
 

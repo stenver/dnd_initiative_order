@@ -5,6 +5,7 @@
 
 #include "initiativewindow.h"
 #include "ui_initiativewindow.h"
+#include "qxtglobalshortcut.h"
 
 InitiativeWindow::InitiativeWindow(QWidget *parent) :
     QWidget(parent),
@@ -46,6 +47,10 @@ void InitiativeWindow::setupButtons(){
     connect(ui->delayButton, &QPushButton::clicked, this, &InitiativeWindow::delayCreature);
     connect(ui->stopDelayButton, &QPushButton::clicked, this, &InitiativeWindow::stopDelayAll);
     connect(ui->addNewCreature, &QPushButton::clicked, this, &InitiativeWindow::addNewCreature);
+
+    QxtGlobalShortcut * shortcut = new QxtGlobalShortcut (this);
+    shortcut-> setShortcut (QKeySequence ("Ctrl + Shift + F12"));
+    connect (shortcut, SIGNAL (activated ()), this, SLOT (startOrEndCombat()));
 }
 
 Creature * InitiativeWindow::createCreature(){

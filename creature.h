@@ -40,7 +40,7 @@ signals:
     void turnEnded();
 
 private slots:
-    void changeAlliance(int);
+    void changeAlliance();
     void createNewStatusEffect();
     void nameEditEnded();
 
