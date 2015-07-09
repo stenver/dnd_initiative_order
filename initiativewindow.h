@@ -37,16 +37,16 @@ private:
     QVBoxLayout *initiativeOrderLayout;
     QList<Creature *> *creatures;
 
-    int delayedCreatures;
     bool isCombat;
 
     void setupInitialCreatures();
     void setupButtons();
 
-    void reorderCreatures();
-    void notifyNextCreatureTurn(int nextCreatureIndex);
     void startCombat();
     void endCombat();
+    void reorderCreatures();
+    void deleteNamelessCreatures();
+    void redrawCreatures();
 
 //    QxtGlobalShortcut globalStartEndCombat;
 //    QxtGlobalShortcut globalNextTurn;

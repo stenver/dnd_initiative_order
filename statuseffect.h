@@ -15,8 +15,8 @@ public:
     StatusEffectBox();
     ~StatusEffectBox();
 
-    void notifyEndTurn();
-    void notifyNewTurn();
+    void endTurn();
+    void startTurn();
 
 private slots:
     void deleteButtonClicked();

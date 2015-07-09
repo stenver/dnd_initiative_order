@@ -25,7 +25,7 @@ Creature::~Creature()
 {
 }
 
-void Creature::notifyTurnStart(){
+void Creature::startTurn(){
     active = true;
     delaying = false;
     configureStylesheet();
@@ -37,19 +37,30 @@ void Creature::notifyTurnStart(){
     }
 
     for(int i = 0; i < statusEffects->size(); i++){
-        statusEffects->at(i)->notifyNewTurn();
+        statusEffects->at(i)->startTurn();
     }
 }
 
-void Creature::notifyCombatOver(){
+void Creature::startCombat(){
+    initiativeSpinBox->setEnabled(false);
+}
+
+void Creature::endCombat(){
     active = false;
     delaying = false;
     configureStylesheet();
+    initiativeSpinBox->setEnabled(true);
 }
 
 void Creature::delay(){
     active = false;
     delaying = true;
+    configureStylesheet();
+}
+
+void Creature::resetState(){
+    delaying = false;
+    active = false;
     configureStylesheet();
 }
 
@@ -61,7 +72,7 @@ void Creature::notifyTurnEnd(){
     QList<StatusEffectBox *>::iterator it = statusEffects->begin();
     while(it != statusEffects->end()){
         StatusEffectBox * statusEffect = *it;
-        statusEffect->notifyEndTurn();
+        statusEffect->endTurn();
         // Notify end turn might delete some status effects, recheck iterators
         if(it != statusEffects->end()){
             ++it;
@@ -151,9 +162,13 @@ void Creature::setupSounds(){
 }
 
 void Creature::configureStylesheet(){
-    if(delaying){
-        setObjectName("delaying");
-        setStyleSheet("QGroupBox#delaying");
+    if(enemyCheckbox->checkState() == 2 && delaying){
+        setObjectName("foeDelaying");
+        setStyleSheet("QGroupBox#foeDelaying");
+        show();
+    }else if(enemyCheckbox->checkState() == 0 && delaying){
+        setObjectName("friendDelaying");
+        setStyleSheet("QGroupBox#friendDelaying");
         show();
     }else if(enemyCheckbox->checkState() == 2 && active){
         setObjectName("foeActive");

@@ -21,8 +21,10 @@ public:
     Creature();
     ~Creature();
 
-    void notifyTurnStart();
-    void notifyCombatOver();
+    void startTurn();
+    void endCombat();
+    void startCombat();
+    void resetState();
     void delay();
     void notifyTurnEnd();
     bool isActive();

@@ -28,7 +28,7 @@ void StatusEffectBox::deleteButtonClicked(){
     deleteStatusEffect();
 }
 
-void StatusEffectBox::notifyNewTurn(){
+void StatusEffectBox::startTurn(){
     if(initiativeSpinBox->text().toInt() == 1){
         setObjectName("statusAboutToEnd");
         setStyleSheet("QGroupBox#statusAboutToEnd");
@@ -36,7 +36,7 @@ void StatusEffectBox::notifyNewTurn(){
     }
 }
 
-void StatusEffectBox::notifyEndTurn(){
+void StatusEffectBox::endTurn(){
     int statusTurnsLeft = initiativeSpinBox->text().toInt() - 1;
     initiativeSpinBox->setValue(statusTurnsLeft);
     if (statusTurnsLeft == 0){

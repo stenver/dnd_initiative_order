@@ -91,10 +91,16 @@ QGroupBox#foe {
     margin-top: 1ex; /* leave space at the top for the title */
 }
 
-QGroupBox#delaying {
-    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                      stop: 0 rgb(202, 203, 201), stop: 1 #FFFFFF);
-    border: 2px solid gray;
+QGroupBox#foeDelaying {
+    background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(163, 163, 163, 255), stop:1 rgba(255, 68, 68, 158));
+    border: 2px solid red;
+    border-radius: 5px;
+    margin-top: 1ex; /* leave space at the top for the title */
+}
+
+QGroupBox#friendDelaying {
+    background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(142, 142, 142, 255), stop:1 rgba(69, 255, 51, 83));
+    border: 2px solid green;
     border-radius: 5px;
     margin-top: 1ex; /* leave space at the top for the title */
 }
