@@ -1,6 +1,7 @@
 #include <QtWidgets>
 #include <algorithm>
 #include <QListIterator>
+#include <QAbstractEventDispatcher>
 
 #include "initiativewindow.h"
 #include "ui_initiativewindow.h"
@@ -39,12 +40,14 @@ void InitiativeWindow::setupButtons(){
     ui->stopDelayButton->setEnabled(false);
     ui->nextCreatureButton->setEnabled(false);
     ui->deleteCreatureButton->setEnabled(false);
+    ui->addNewCreature->setEnabled(false);
 
     connect(ui->startEndButton, SIGNAL(clicked()), this, SLOT(startOrEndCombat()));
     connect(ui->nextCreatureButton, SIGNAL(clicked(bool)), this, SLOT(nextCreatureTurn()));
     connect(ui->deleteCreatureButton, SIGNAL(clicked(bool)), this, SLOT(deleteCreature()));
     connect(ui->delayButton, SIGNAL(clicked(bool)), this, SLOT(delayCreature()));
     connect(ui->stopDelayButton, SIGNAL(clicked()), this, SLOT(stopDelayAll()));
+    connect(ui->addNewCreature, SIGNAL(clicked()), this, SLOT(addNewCreature()));
 }
 
 Creature * InitiativeWindow::createCreature(){
@@ -74,28 +77,14 @@ bool static sortByInitiative(Creature * x, Creature * y){
 }
 
 void InitiativeWindow::startCombat(){
-    std::sort (creatures->begin(), creatures->end(), &sortByInitiative);
-
-    QList<Creature *>::iterator it = creatures->begin();
-    while (it != creatures->end()) {
-      Creature * creature = *it;
-
-      initiativeOrderLayout->removeWidget(creature);
-
-      if(creature->name() != ""){
-          initiativeOrderLayout->addWidget(creature);
-          ++it;
-      }else{
-          delete creature;
-          creatures->erase(it);
-      }
-    }
-
+    reorderCreatures();
     isCombat = true;
+
     ui->startEndButton->setText("End combat");
     ui->delayButton->setEnabled(true);
     ui->nextCreatureButton->setEnabled(true);
     ui->deleteCreatureButton->setEnabled(true);
+    ui->addNewCreature->setEnabled(true);
 
     creatures->first()->notifyTurnStart();
 }
@@ -107,12 +96,17 @@ void InitiativeWindow::endCombat(){
 
       if(creature->isEnemy()){
           initiativeOrderLayout->removeWidget(creature);
-          creatures->erase(it);
+          it = creatures->erase(it);
           delete creature;
       }else{
           creature->notifyCombatOver();
           ++it;
       }
+    }
+
+    if(creatures->size() == 0){
+        creatures->append(createCreature());
+        initiativeOrderLayout->addWidget(creatures->at(0));
     }
 
     isCombat = false;
@@ -122,13 +116,14 @@ void InitiativeWindow::endCombat(){
     ui->stopDelayButton->setEnabled(false);
     ui->nextCreatureButton->setEnabled(false);
     ui->deleteCreatureButton->setEnabled(false);
+    ui->addNewCreature->setEnabled(false);
 }
 
 void InitiativeWindow::nextCreatureTurn(){
-    for(int i = 0; i < creatures->size(); i++){
+    for(int i = delayedCreatures; i < creatures->size(); i++){
         Creature *creature = creatures->at(i);
         if (creature->isActive()){
-            creature->endCreatureTurn();
+            creature->notifyTurnEnd();
             notifyNextCreatureTurn(i + 1);
             break;
         }
@@ -162,7 +157,7 @@ void InitiativeWindow::stopDelayAll(){
     for(int i = 0; i < creatures->size(); i++){
         Creature * c = creatures->at(i);
         bool delaying = c->isDelaying();
-        c->endCreatureTurn();
+        c->notifyTurnEnd();
         if (delaying && firstDelay){
             c->notifyTurnStart();
             firstDelay = false;
@@ -172,7 +167,7 @@ void InitiativeWindow::stopDelayAll(){
 
 void InitiativeWindow::deleteCreature(){
     if(creatures->size() > 1){
-        initiativeOrderLayout->takeAt(0);
+        initiativeOrderLayout->takeAt(delayedCreatures);
         for(int i = 0; i < creatures->size(); i++){
            Creature * creature = creatures->at(i);
            if(creature->isActive()){
@@ -187,9 +182,46 @@ void InitiativeWindow::deleteCreature(){
     }
 }
 
+void InitiativeWindow::addNewCreature(){
+    Creature * new_creature = createCreature();
+    creatures->at(delayedCreatures)->notifyTurnEnd();
+
+    // Clean up layout
+    for(int i = 0; i < creatures->size(); i++){
+        initiativeOrderLayout->removeWidget(creatures->at(i));
+    }
+
+    creatures->insert(delayedCreatures, new_creature);
+    new_creature->notifyTurnStart();
+
+    // Redraw the creatures
+    for(int i = 0; i < creatures->size(); i++){
+        initiativeOrderLayout->addWidget(creatures->at(i));
+    }
+}
+
+void InitiativeWindow::reorderCreatures(){
+    std::sort (creatures->begin(), creatures->end(), &sortByInitiative);
+
+    QList<Creature *>::iterator it = creatures->begin();
+    while (it != creatures->end()) {
+      Creature * creature = *it;
+
+      initiativeOrderLayout->removeWidget(creature);
+
+      if(creature->name() != ""){
+          initiativeOrderLayout->addWidget(creature);
+          ++it;
+      }else{
+          delete creature;
+          it = creatures->erase(it);
+      }
+    }
+}
+
 void InitiativeWindow::notifyNextCreatureTurn(int nextCreatureIndex){
     if(nextCreatureIndex == creatures->size()){
-        creatures->at(0)->notifyTurnStart();
+        creatures->at(delayedCreatures)->notifyTurnStart();
     }else{
         creatures->at(nextCreatureIndex)->notifyTurnStart();
     }

@@ -10,14 +10,13 @@ class QPushButton;
 
 class StatusEffectBox : public QGroupBox
 {
+    Q_OBJECT
 public:
     StatusEffectBox();
     ~StatusEffectBox();
 
+    void notifyEndTurn();
     void notifyNewTurn();
-
-signals:
-    void ExpireStatusEffect(StatusEffectBox*);
 
 private slots:
     void deleteButtonClicked();
@@ -27,6 +26,8 @@ private:
     QSpinBox *initiativeSpinBox;
     QPushButton *deleteButton;
     QVBoxLayout *layout;
+
+    void deleteStatusEffect();
 };
 
 #endif // STATUSEFFECT_H

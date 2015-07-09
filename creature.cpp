@@ -8,29 +8,9 @@ Creature::Creature()
     delaying = false;
     statusEffects = new QList<StatusEffectBox *>();
 
-    nameEdit = new QLineEdit();
-    nameEdit->setMaximumWidth(200);
-    nameEdit->setFixedWidth(200);
-    nameEdit->setPlaceholderText("Creature name");
-
-    initiativeSpinBox = new QDoubleSpinBox();
-    initiativeSpinBox->setMaximum(50);
-
-    enemyCheckbox = new QCheckBox(tr("Enemy?"));
-    enemyCheckbox->setChecked(true);
-    connect(enemyCheckbox, SIGNAL(stateChanged(int)), this, SLOT(changeAlliance(int)));
-
-    basicInfoLayout = new QGridLayout;
-    basicInfoLayout->addWidget(nameEdit);
-    basicInfoLayout->addWidget(initiativeSpinBox);
-    basicInfoLayout->addWidget(enemyCheckbox);
-
-    QPushButton * addStatusEffectButton = new QPushButton();
-    addStatusEffectButton->setText("+");
-    connect(addStatusEffectButton, SIGNAL(clicked()), this, SLOT(createNewStatusEffect()));
-
-    extraInfoLayout = new QHBoxLayout;
-    extraInfoLayout->addWidget(addStatusEffectButton);
+    setupBasicInfoLayout();
+    setupExtraInfoLayout();
+    setupSounds();
 
     mainLayout = new QHBoxLayout;
     mainLayout->addLayout(basicInfoLayout);
@@ -45,14 +25,17 @@ Creature::~Creature()
 {
 }
 
-void Creature::changeAlliance(int state){
-    configureStylesheet();
-}
-
 void Creature::notifyTurnStart(){
     active = true;
     delaying = false;
     configureStylesheet();
+
+    if(enemyCheckbox->isChecked()){
+        foePlayer->play();
+    }else{
+        friendPlayer->play();
+    }
+
     for(int i = 0; i < statusEffects->size(); i++){
         statusEffects->at(i)->notifyNewTurn();
     }
@@ -70,10 +53,22 @@ void Creature::delay(){
     configureStylesheet();
 }
 
-void Creature::endCreatureTurn(){
+void Creature::notifyTurnEnd(){
     delaying = false;
     active = false;
     configureStylesheet();
+
+    QList<StatusEffectBox *>::iterator it = statusEffects->begin();
+    while(it != statusEffects->end()){
+        StatusEffectBox * statusEffect = *it;
+        statusEffect->notifyEndTurn();
+        // Notify end turn might delete some status effects, recheck iterators
+        if(it != statusEffects->end()){
+            ++it;
+        }else{
+            break;
+        }
+    }
 }
 
 bool Creature::isActive(){
@@ -92,15 +87,67 @@ QString Creature::name(){
     return nameEdit->text();
 }
 
-int Creature::initiativeValue(){
-    return initiativeSpinBox->text().toDouble();
+double Creature::initiativeValue(){
+    return initiativeSpinBox->value();
+}
+
+void Creature::changeAlliance(int state){
+    configureStylesheet();
 }
 
 void Creature::createNewStatusEffect(){
     StatusEffectBox * statusEffect = new StatusEffectBox();
-    connect(statusEffect, SIGNAL(expireStatusEffect(StatusEffectBox*)), this, SLOT(deleteStatusEffect(StatusEffectBox*)));
+    connect(statusEffect, SIGNAL(destroyed(QObject*)), this, SLOT(deleteStatusEffect(QObject*)));
     extraInfoLayout->addWidget(statusEffect);
     statusEffects->append(statusEffect);
+}
+
+void Creature::deleteStatusEffect(QObject *statusEffect){
+    QList<StatusEffectBox *>::iterator it = statusEffects->begin();
+    while(it != statusEffects->end()){
+        StatusEffectBox * s = *it;
+        if(s == statusEffect){
+            it = statusEffects->erase(it);
+            extraInfoLayout->removeWidget(s);
+            break;
+        }else{
+            ++it;
+        }
+    }
+}
+
+void Creature::setupBasicInfoLayout(){
+    nameEdit = new QLineEdit();
+    nameEdit->setMaximumWidth(200);
+    nameEdit->setFixedWidth(200);
+    nameEdit->setPlaceholderText("Creature name");
+
+    initiativeSpinBox = new QDoubleSpinBox();
+    initiativeSpinBox->setMaximum(50);
+
+    enemyCheckbox = new QCheckBox(tr("Enemy?"));
+    enemyCheckbox->setChecked(true);
+    connect(enemyCheckbox, SIGNAL(stateChanged(int)), this, SLOT(changeAlliance(int)));
+
+    basicInfoLayout = new QGridLayout;
+    basicInfoLayout->addWidget(nameEdit);
+    basicInfoLayout->addWidget(initiativeSpinBox);
+    basicInfoLayout->addWidget(enemyCheckbox);
+}
+
+void Creature::setupExtraInfoLayout(){
+    addStatusEffectButton = new QPushButton();
+    addStatusEffectButton->setText("Add status");
+    connect(addStatusEffectButton, SIGNAL(clicked()), this, SLOT(createNewStatusEffect()));
+
+    extraInfoLayout = new QHBoxLayout;
+    extraInfoLayout->addWidget(addStatusEffectButton);
+}
+
+void Creature::setupSounds(){
+    // TODO set proper relative path
+    friendPlayer = new QSound(QUrl::fromLocalFile("/Users/stenver/cpp/dnd_initatives/friend.wav").path());
+    foePlayer = new QSound(QUrl::fromLocalFile("/Users/stenver/cpp/dnd_initatives/foe.wav").path());
 }
 
 void Creature::configureStylesheet(){
@@ -127,8 +174,3 @@ void Creature::configureStylesheet(){
     }
 }
 
-void Creature::deleteStatusEffect(StatusEffectBox *statusEffect){
-    statusEffects->removeOne(statusEffect);
-    extraInfoLayout->removeWidget(statusEffect);
-    delete statusEffect;
-}

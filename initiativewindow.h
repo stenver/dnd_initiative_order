@@ -1,9 +1,10 @@
 #ifndef INITIATIVEWINDOW_H
 #define INITIATIVEWINDOW_H
 
-//#include <QxtGlobalShortcut
 #include <QWidget>
 #include <QToolbox>
+
+//#include <QxtGlobalShortcut>
 
 #include "creature.h"
 
@@ -28,27 +29,31 @@ private slots:
     void delayCreature();
     void stopDelayAll();
     void deleteCreature();
+    void addNewCreature();
 
 private:
     Ui::InitiativeWindow *ui;
+    Creature *createCreature();
+    QVBoxLayout *initiativeOrderLayout;
+    QList<Creature *> *creatures;
 
     int delayedCreatures;
-    Creature *createCreature();
     bool isCombat;
+
     void setupInitialCreatures();
     void setupButtons();
-    void notifyNextCreatureTurn(int nextCreatureIndex);
 
+    void reorderCreatures();
+    void notifyNextCreatureTurn(int nextCreatureIndex);
     void startCombat();
     void endCombat();
 
-    QVBoxLayout *initiativeOrderLayout;
-    QList<Creature *> *creatures;
 //    QxtGlobalShortcut globalStartEndCombat;
 //    QxtGlobalShortcut globalNextTurn;
 //    QxtGlobalShortcut globalDelete;
 //    QxtGlobalShortcut globalDelay;
 //    QxtGlobalShortcut globalStopDelay;
+//    QxtGlobalShortcut globalAddNewCreature;
 };
 
 #endif // INITIATIVEWINDOW_H

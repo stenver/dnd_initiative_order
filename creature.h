@@ -3,6 +3,7 @@
 
 #include <QGroupBox>
 #include <QHBoxLayout>
+#include <QSound>
 
 #include "statuseffect.h"
 
@@ -23,18 +24,19 @@ public:
     void notifyTurnStart();
     void notifyCombatOver();
     void delay();
-    void endCreatureTurn();
+    void notifyTurnEnd();
     bool isActive();
     bool isDelaying();
     bool isEnemy();
     QString name();
-    int initiativeValue();
+    double initiativeValue();
 
     QLineEdit *nameEdit;
 
 private slots:
     void changeAlliance(int);
     void createNewStatusEffect();
+    void deleteStatusEffect(QObject * statusEffect);
 
 private:
     bool delaying;
@@ -46,9 +48,15 @@ private:
     QHBoxLayout *extraInfoLayout;
     QDoubleSpinBox *initiativeSpinBox;
     QList<StatusEffectBox *> *statusEffects;
+    QPushButton * addStatusEffectButton;
+    QSound * friendPlayer;
+    QSound * foePlayer;
 
-    void deleteStatusEffect(StatusEffectBox * statusEffect);
+    void setupBasicInfoLayout();
+    void setupExtraInfoLayout();
+    void setupSounds();
     void configureStylesheet();
+
 };
 
 #endif // CREATURE_H
