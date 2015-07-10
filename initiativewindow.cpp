@@ -22,6 +22,7 @@ InitiativeWindow::~InitiativeWindow()
 
 void InitiativeWindow::setupInitialCreatures(){
     initiativeOrderLayout = new QVBoxLayout;
+    initiativeOrderLayout->setAlignment(Qt::AlignTop);
 
     creatures.append(createCreature());
     creatures.append(createCreature());
