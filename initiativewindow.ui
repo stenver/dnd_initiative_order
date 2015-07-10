@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1053</width>
+    <width>1050</width>
     <height>666</height>
    </rect>
   </property>
@@ -33,7 +33,7 @@
     <item>
      <widget class="QPushButton" name="deleteCreatureButton">
       <property name="text">
-       <string>Delete Creature</string>
+       <string>Delete active creature</string>
       </property>
      </widget>
     </item>
@@ -47,7 +47,7 @@
     <item>
      <widget class="QPushButton" name="delayButton">
       <property name="text">
-       <string>Delay</string>
+       <string>Delay active creature</string>
       </property>
      </widget>
     </item>
@@ -131,10 +131,21 @@ QGroupBox#statusAboutToEnd {
     border: 1px blue;
     border-radius: 5px;
     margin-top: 1ex; /* leave space at the top for the title */
-}</string>
+}
+
+QGroupBox#statusEndsNow {
+    background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.333333 rgba(255, 255, 255, 139), stop:0.850746 rgba(179, 179, 179, 211));
+    border: 1px blue;
+    border-radius: 5px;
+    margin-top: 1ex; /* leave space at the top for the title */
+}
+</string>
    </property>
    <property name="widgetResizable">
     <bool>true</bool>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
    </property>
    <widget class="QWidget" name="scrollAreaWidgetContents">
     <property name="geometry">

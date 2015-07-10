@@ -18,45 +18,46 @@ class Creature : public QGroupBox
 {
     Q_OBJECT
 public:
-    Creature();
+    Creature(QWidget *parent = nullptr);
     ~Creature();
 
-    void startTurn();
     void endCombat();
+    void startTurn();
     void startCombat();
     void resetState();
     void delay();
     void notifyTurnEnd();
-    bool isActive();
-    bool isDelaying();
-    bool isEnemy();
-    QString name();
-    double initiativeValue();
 
-    QLineEdit *nameEdit;
+    bool isActive() const;
+    bool isDelaying() const;
+    bool isEnemy() const;
+    QString name() const;
+    double initiativeValue() const;
+
+signals:
+    void nameEdited();
+    void turnStarted();
+    void turnEnded();
 
 private slots:
     void changeAlliance(int);
     void createNewStatusEffect();
-    void deleteStatusEffect(QObject * statusEffect);
+    void nameEditEnded();
 
 private:
-    bool delaying;
-    bool active;
+    bool delaying = false;
+    bool active = false;
 
     QCheckBox *enemyCheckbox;
     QHBoxLayout *mainLayout;
     QGridLayout *basicInfoLayout;
     QHBoxLayout *extraInfoLayout;
     QDoubleSpinBox *initiativeSpinBox;
-    QList<StatusEffectBox *> *statusEffects;
     QPushButton * addStatusEffectButton;
-    QSound * friendPlayer;
-    QSound * foePlayer;
+    QLineEdit *nameEdit;
 
     void setupBasicInfoLayout();
     void setupExtraInfoLayout();
-    void setupSounds();
     void configureStylesheet();
 
 };

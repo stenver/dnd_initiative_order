@@ -28,16 +28,16 @@ private slots:
     void nextCreatureTurn();
     void delayCreature();
     void stopDelayAll();
-    void deleteCreature();
+    void deleteActiveCreature();
     void addNewCreature();
 
 private:
     Ui::InitiativeWindow *ui;
     Creature *createCreature();
     QVBoxLayout *initiativeOrderLayout;
-    QList<Creature *> *creatures;
+    QList<Creature *> creatures;
 
-    bool isCombat;
+    bool isCombat = false;
 
     void setupInitialCreatures();
     void setupButtons();

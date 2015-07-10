@@ -12,14 +12,15 @@ class StatusEffectBox : public QGroupBox
 {
     Q_OBJECT
 public:
-    StatusEffectBox();
+    StatusEffectBox(QWidget *parent = nullptr);
     ~StatusEffectBox();
-
-    void endTurn();
-    void startTurn();
 
 private slots:
     void deleteButtonClicked();
+
+public slots:
+    void startTurn();
+    void endTurn();
 
 private:
     QLineEdit *statusNameEdit;

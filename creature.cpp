@@ -2,15 +2,10 @@
 
 #include "creature.h"
 
-Creature::Creature()
+Creature::Creature(QWidget *parent) : QGroupBox(parent)
 {
-    active = false;
-    delaying = false;
-    statusEffects = new QList<StatusEffectBox *>();
-
     setupBasicInfoLayout();
     setupExtraInfoLayout();
-    setupSounds();
 
     mainLayout = new QHBoxLayout;
     mainLayout->addLayout(basicInfoLayout);
@@ -19,6 +14,9 @@ Creature::Creature()
     setLayout(mainLayout);
     setObjectName("foe");
     setStyleSheet("QGroupBox#foe");
+    setFixedHeight(160);
+
+    connect(nameEdit, &QLineEdit::editingFinished, this, &Creature::nameEditEnded);
 }
 
 Creature::~Creature()
@@ -30,15 +28,13 @@ void Creature::startTurn(){
     delaying = false;
     configureStylesheet();
 
-    if(enemyCheckbox->isChecked()){
-        foePlayer->play();
+    if(isEnemy()){
+        QSound::play(QUrl::fromLocalFile(":/sounds/foe.wav").path());
     }else{
-        friendPlayer->play();
+        QSound::play(QUrl::fromLocalFile(":/sounds/friend.wav").path());
     }
 
-    for(int i = 0; i < statusEffects->size(); i++){
-        statusEffects->at(i)->startTurn();
-    }
+    emit turnStarted();
 }
 
 void Creature::startCombat(){
@@ -69,36 +65,26 @@ void Creature::notifyTurnEnd(){
     active = false;
     configureStylesheet();
 
-    QList<StatusEffectBox *>::iterator it = statusEffects->begin();
-    while(it != statusEffects->end()){
-        StatusEffectBox * statusEffect = *it;
-        statusEffect->endTurn();
-        // Notify end turn might delete some status effects, recheck iterators
-        if(it != statusEffects->end()){
-            ++it;
-        }else{
-            break;
-        }
-    }
+    emit turnEnded();
 }
 
-bool Creature::isActive(){
+bool Creature::isActive() const{
     return active;
 }
 
-bool Creature::isDelaying(){
+bool Creature::isDelaying() const{
     return delaying;
 }
 
-bool Creature::isEnemy(){
+bool Creature::isEnemy() const{
     return enemyCheckbox->isChecked();
 }
 
-QString Creature::name(){
+QString Creature::name() const{
     return nameEdit->text();
 }
 
-double Creature::initiativeValue(){
+double Creature::initiativeValue() const{
     return initiativeSpinBox->value();
 }
 
@@ -108,29 +94,20 @@ void Creature::changeAlliance(int state){
 
 void Creature::createNewStatusEffect(){
     StatusEffectBox * statusEffect = new StatusEffectBox();
-    connect(statusEffect, SIGNAL(destroyed(QObject*)), this, SLOT(deleteStatusEffect(QObject*)));
+
+    connect(this, &Creature::turnStarted, statusEffect, &StatusEffectBox::startTurn);
+    connect(this, &Creature::turnEnded, statusEffect, &StatusEffectBox::endTurn);
+
     extraInfoLayout->addWidget(statusEffect);
-    statusEffects->append(statusEffect);
 }
 
-void Creature::deleteStatusEffect(QObject *statusEffect){
-    QList<StatusEffectBox *>::iterator it = statusEffects->begin();
-    while(it != statusEffects->end()){
-        StatusEffectBox * s = *it;
-        if(s == statusEffect){
-            it = statusEffects->erase(it);
-            extraInfoLayout->removeWidget(s);
-            break;
-        }else{
-            ++it;
-        }
-    }
+void Creature::nameEditEnded(){
+    emit nameEdited();
 }
 
 void Creature::setupBasicInfoLayout(){
     nameEdit = new QLineEdit();
     nameEdit->setMaximumWidth(200);
-    nameEdit->setFixedWidth(200);
     nameEdit->setPlaceholderText("Creature name");
 
     initiativeSpinBox = new QDoubleSpinBox();
@@ -138,7 +115,7 @@ void Creature::setupBasicInfoLayout(){
 
     enemyCheckbox = new QCheckBox(tr("Enemy?"));
     enemyCheckbox->setChecked(true);
-    connect(enemyCheckbox, SIGNAL(stateChanged(int)), this, SLOT(changeAlliance(int)));
+    connect(enemyCheckbox, &QCheckBox::stateChanged, this, &Creature::changeAlliance);
 
     basicInfoLayout = new QGridLayout;
     basicInfoLayout->addWidget(nameEdit);
@@ -147,44 +124,32 @@ void Creature::setupBasicInfoLayout(){
 }
 
 void Creature::setupExtraInfoLayout(){
-    addStatusEffectButton = new QPushButton();
-    addStatusEffectButton->setText("Add status");
-    connect(addStatusEffectButton, SIGNAL(clicked()), this, SLOT(createNewStatusEffect()));
+    addStatusEffectButton = new QPushButton("Add status");
+    connect(addStatusEffectButton, &QPushButton::clicked, this, &Creature::createNewStatusEffect);
 
     extraInfoLayout = new QHBoxLayout;
     extraInfoLayout->addWidget(addStatusEffectButton);
 }
 
-void Creature::setupSounds(){
-    friendPlayer = new QSound(QUrl::fromLocalFile(":/sounds/friend.wav").path());
-    foePlayer = new QSound(QUrl::fromLocalFile(":/sounds/foe.wav").path());
-}
-
 void Creature::configureStylesheet(){
-    if(enemyCheckbox->checkState() == 2 && delaying){
+    if(isEnemy() && delaying){
         setObjectName("foeDelaying");
         setStyleSheet("QGroupBox#foeDelaying");
-        show();
-    }else if(enemyCheckbox->checkState() == 0 && delaying){
+    }else if(!isEnemy() && delaying){
         setObjectName("friendDelaying");
         setStyleSheet("QGroupBox#friendDelaying");
-        show();
-    }else if(enemyCheckbox->checkState() == 2 && active){
+    }else if(isEnemy() && active){
         setObjectName("foeActive");
         setStyleSheet("QGroupBox#foeActive");
-        show();
-    }else if(enemyCheckbox->checkState() == 2){
+    }else if(isEnemy()){
         setObjectName("foe");
         setStyleSheet("QGroupBox#foe");
-        show();
-    }else if(enemyCheckbox->checkState() == 0 && active){
+    }else if(!isEnemy() && active){
         setObjectName("friendActive");
         setStyleSheet("QGroupBox#friendActive");
-        show();
     }else{
         setObjectName("friend");
         setStyleSheet("QGroupBox#friend");
-        show();
     }
 }
 
