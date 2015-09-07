@@ -24,8 +24,8 @@ void InitiativeWindow::setupInitialCreatures(){
     initiativeOrderLayout = new QVBoxLayout;
     initiativeOrderLayout->setAlignment(Qt::AlignTop);
 
-    creatures.append(createCreature());
-    creatures.append(createCreature());
+    creatures.append(createCreature(false));
+    creatures.append(createCreature(false));
 
     initiativeOrderLayout->addWidget(creatures.at(0));
     initiativeOrderLayout->addWidget(creatures.at(1));
@@ -46,10 +46,34 @@ void InitiativeWindow::setupButtons(){
     connect(ui->delayButton, &QPushButton::clicked, this, &InitiativeWindow::delayCreature);
     connect(ui->stopDelayButton, &QPushButton::clicked, this, &InitiativeWindow::stopDelayAll);
     connect(ui->addNewCreature, &QPushButton::clicked, this, &InitiativeWindow::addNewCreature);
+
+    globalStartEndCombat = new QxtGlobalShortcut (this);
+    globalStartEndCombat->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
+    connect(globalStartEndCombat, &QxtGlobalShortcut::activated, this, &InitiativeWindow::startOrEndCombat);
+
+    globalNextTurn = new QxtGlobalShortcut (this);
+    globalNextTurn->setShortcut(QKeySequence (Qt::CTRL + Qt::Key_F1));
+    connect(globalNextTurn, &QxtGlobalShortcut::activated, this, &InitiativeWindow::nextCreatureTurn);
+
+    globalDelay = new QxtGlobalShortcut (this);
+    globalDelay->setShortcut(QKeySequence (Qt::CTRL + Qt::Key_F2));
+    connect(globalDelay, &QxtGlobalShortcut::activated, this, &InitiativeWindow::delayCreature);
+
+    globalStopDelay = new QxtGlobalShortcut (this);
+    globalStopDelay->setShortcut(QKeySequence (Qt::CTRL + Qt::Key_F3));
+    connect(globalStopDelay, &QxtGlobalShortcut::activated, this, &InitiativeWindow::stopDelayAll);
+
+    globalDelete = new QxtGlobalShortcut (this);
+    globalDelete->setShortcut(QKeySequence (Qt::CTRL + Qt::Key_F11));
+    connect(globalDelete, &QxtGlobalShortcut::activated, this, &InitiativeWindow::deleteActiveCreature);
+
+    globalAddNewCreature = new QxtGlobalShortcut (this);
+    globalAddNewCreature->setShortcut(QKeySequence (Qt::CTRL + Qt::Key_F12));
+    connect(globalAddNewCreature, &QxtGlobalShortcut::activated, this, &InitiativeWindow::addNewCreature);
 }
 
-Creature * InitiativeWindow::createCreature(){
-    Creature *creature = new Creature;
+Creature * InitiativeWindow::createCreature(bool enemy){
+    Creature *creature = new Creature(enemy);
     connect(creature, &Creature::nameEdited, this, &InitiativeWindow::createNewCreatureIfLast);
     return creature;
 }
@@ -113,6 +137,7 @@ void InitiativeWindow::endCombat(){
 }
 
 void InitiativeWindow::nextCreatureTurn(){
+    if(!isCombat) return;
     Creature * creature = creatures.takeAt(0);
     creature->notifyTurnEnd();
     creatures.push_back(creature);
@@ -121,6 +146,7 @@ void InitiativeWindow::nextCreatureTurn(){
 }
 
 void InitiativeWindow::delayCreature(){
+    if(!isCombat) return;
     Creature * creature = creatures.takeAt(0);
     if(creature->isDelaying()){
         stopDelayAll();
@@ -135,7 +161,7 @@ void InitiativeWindow::delayCreature(){
 }
 
 void InitiativeWindow::stopDelayAll(){
-    creatures.at(0)->resetState();
+    if(!isCombat) return;
 
     QList<Creature*> delayingCreatures;
     QList<Creature *>::iterator it = creatures.begin();
@@ -151,6 +177,7 @@ void InitiativeWindow::stopDelayAll(){
     }
 
     if(delayingCreatures.size() > 0){
+        creatures.at(0)->resetState();
         delayingCreatures.at(0)->startTurn();
 
         for(int i = 0; i < delayingCreatures.size(); i++){
@@ -163,6 +190,7 @@ void InitiativeWindow::stopDelayAll(){
 }
 
 void InitiativeWindow::deleteActiveCreature(){
+    if(!isCombat) return;
     if(creatures.size() > 1){
         Creature * creature = creatures.takeAt(0);
         creatures.at(0)->startTurn();
@@ -174,6 +202,7 @@ void InitiativeWindow::deleteActiveCreature(){
 }
 
 void InitiativeWindow::addNewCreature(){
+    if(!isCombat) return;
     creatures.at(0)->resetState();
 
     Creature * new_creature = createCreature();

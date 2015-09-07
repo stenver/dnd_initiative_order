@@ -4,9 +4,8 @@
 #include <QWidget>
 #include <QToolbox>
 
-//#include <QxtGlobalShortcut>
-
 #include "creature.h"
+#include "qxtglobalshortcut.h"
 
 class QVBoxLayout;
 
@@ -33,9 +32,15 @@ private slots:
 
 private:
     Ui::InitiativeWindow *ui;
-    Creature *createCreature();
+    Creature *createCreature(bool enemy = true);
     QVBoxLayout *initiativeOrderLayout;
     QList<Creature *> creatures;
+    QxtGlobalShortcut * globalStartEndCombat;
+    QxtGlobalShortcut * globalNextTurn;
+    QxtGlobalShortcut * globalDelete;
+    QxtGlobalShortcut * globalDelay;
+    QxtGlobalShortcut * globalStopDelay;
+    QxtGlobalShortcut * globalAddNewCreature;
 
     bool isCombat = false;
 
@@ -47,13 +52,6 @@ private:
     void reorderCreatures();
     void deleteNamelessCreatures();
     void redrawCreatures();
-
-//    QxtGlobalShortcut globalStartEndCombat;
-//    QxtGlobalShortcut globalNextTurn;
-//    QxtGlobalShortcut globalDelete;
-//    QxtGlobalShortcut globalDelay;
-//    QxtGlobalShortcut globalStopDelay;
-//    QxtGlobalShortcut globalAddNewCreature;
 };
 
 #endif // INITIATIVEWINDOW_H

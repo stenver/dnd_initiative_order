@@ -18,7 +18,7 @@ class Creature : public QGroupBox
 {
     Q_OBJECT
 public:
-    Creature(QWidget *parent = nullptr);
+    Creature(bool enemy = true, QWidget *parent = nullptr);
     ~Creature();
 
     void endCombat();
@@ -40,7 +40,7 @@ signals:
     void turnEnded();
 
 private slots:
-    void changeAlliance(int);
+    void changeAlliance();
     void createNewStatusEffect();
     void nameEditEnded();
 
@@ -56,7 +56,7 @@ private:
     QPushButton * addStatusEffectButton;
     QLineEdit *nameEdit;
 
-    void setupBasicInfoLayout();
+    void setupBasicInfoLayout(bool enemy);
     void setupExtraInfoLayout();
     void configureStylesheet();
 

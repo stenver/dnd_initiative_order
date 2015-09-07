@@ -2,9 +2,9 @@
 
 #include "creature.h"
 
-Creature::Creature(QWidget *parent) : QGroupBox(parent)
+Creature::Creature(bool enemy, QWidget *parent) : QGroupBox(parent)
 {
-    setupBasicInfoLayout();
+    setupBasicInfoLayout(enemy);
     setupExtraInfoLayout();
 
     mainLayout = new QHBoxLayout;
@@ -12,8 +12,7 @@ Creature::Creature(QWidget *parent) : QGroupBox(parent)
     mainLayout->addLayout(extraInfoLayout);
 
     setLayout(mainLayout);
-    setObjectName("foe");
-    setStyleSheet("QGroupBox#foe");
+    configureStylesheet();
     setFixedHeight(160);
 
     connect(nameEdit, &QLineEdit::editingFinished, this, &Creature::nameEditEnded);
@@ -88,7 +87,7 @@ double Creature::initiativeValue() const{
     return initiativeSpinBox->value();
 }
 
-void Creature::changeAlliance(int state){
+void Creature::changeAlliance(){
     configureStylesheet();
 }
 
@@ -105,7 +104,7 @@ void Creature::nameEditEnded(){
     emit nameEdited();
 }
 
-void Creature::setupBasicInfoLayout(){
+void Creature::setupBasicInfoLayout(bool enemy){
     nameEdit = new QLineEdit();
     nameEdit->setMaximumWidth(200);
     nameEdit->setPlaceholderText("Creature name");
@@ -114,7 +113,7 @@ void Creature::setupBasicInfoLayout(){
     initiativeSpinBox->setMaximum(50);
 
     enemyCheckbox = new QCheckBox(tr("Enemy?"));
-    enemyCheckbox->setChecked(true);
+    enemyCheckbox->setChecked(enemy);
     connect(enemyCheckbox, &QCheckBox::stateChanged, this, &Creature::changeAlliance);
 
     basicInfoLayout = new QGridLayout;
