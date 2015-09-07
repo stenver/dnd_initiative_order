@@ -21,16 +21,27 @@ HEADERS  += initiativewindow.h \
     creature.h \
     statuseffect.h
 
-#win32:SOURCES += / qxtglobalshortcut_win.cpp
+contains(QMAKE_LFLAGS, "-Wl,--no-undefined"):LIBS += $${QMAKE_LIBS_X11}
 
-#unix:! macx {
-#    INCLUDEPATH += /usr/include/qt/QtGui/5.4.0/QtGui
-#    LIBS += -lX11
-#    SOURCES += / qxtglobalshortcut_x11.cpp
-#}
+!qws:!symbian {
+    HEADERS  += qxtglobalshortcut.h
+    HEADERS  += qxtglobalshortcut_p.h
+    HEADERS  += qxtglobal.h
+    SOURCES  += qxtglobalshortcut.cpp
 
-unix: macx {
-    SOURCES += / qxtglobalshortcut_mac.cpp
+    macx {
+        SOURCES += qxtglobalshortcut_mac.cpp
+        LIBS += -framework Carbon
+    }
+    unix:!macx {
+        INCLUDEPATH += /usr/include/qt/QtGui/5.4.0/QtGui
+        LIBS += -lX11
+        SOURCES += x11/qxtglobalshortcut_x11.cpp
+    }
+    win32 {
+        LIBS += -luser32
+        SOURCES += win/qxtglobalshortcut_win.cpp
+    }
 }
 
 FORMS += \
